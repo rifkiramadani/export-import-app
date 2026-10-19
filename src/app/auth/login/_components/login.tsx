@@ -22,6 +22,7 @@ import { useSearchParams } from "next/navigation";
 import { Eye, EyeClosed } from "lucide-react";
 import Link from "next/link";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "cn";
 
 interface ILoginPage {
   title: string;
@@ -76,20 +77,29 @@ const Login = ({ title, description }: ILoginPage) => {
   }, [state]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+    <Card className="bg-linear-to-br from-secondary to-primary text-white shadow-2xl shadow-secondary">
+      <CardHeader className="space-x-4">
+        <CardTitle className="text-3xl font-thin">{title}</CardTitle>
+        <CardDescription className="text-white font-light">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="px-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="font-light">
+              Email
+            </Label>
             <Input
               {...register("email")}
               id="email"
               type="email"
               placeholder="Input your email..."
+              className={cn(
+                "placeholder:text-gray-400 bg-gray-700",
+                (formErrors.email || state.errors?.email?.[0]) &&
+                  "ring-2 ring-red-500 focus-visible:ring-red-500",
+              )}
             />
             {(formErrors.email?.message || state.errors?.email?.[0]) && (
               <span className="text-xs text-red-500">
@@ -97,18 +107,26 @@ const Login = ({ title, description }: ILoginPage) => {
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-2 mt-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="flex flex-col gap-2 mt-4 mb-3">
+            <Label htmlFor="password" className="font-light">
+              Password
+            </Label>
             <div className="flex flex-row space-x-2">
               <Input
                 {...register("password")}
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Input your password..."
+                className={cn(
+                  "placeholder:text-gray-400 bg-gray-700",
+                  (formErrors.password || state.errors?.password?.[0]) &&
+                    "ring-2 ring-red-500 focus-visible:ring-red-500",
+                )}
               />
               <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                className=" bg-gray-700 hover:bg-gray-500"
               >
                 {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
               </Button>
@@ -119,17 +137,21 @@ const Login = ({ title, description }: ILoginPage) => {
               </span>
             )}
           </div>
-          <Button className="mt-3 w-full" type="submit" disabled={isPending}>
+          <Button
+            className="mt-3 w-full border-2 bg-gray-700 hover:bg-gray-500"
+            type="submit"
+            disabled={isPending}
+          >
             {isPending ? <Spinner /> : "Login"}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <CardDescription>
+        <CardDescription className="text-white font-light">
           Not Have An Account?{" "}
           <Link
             href={"/auth/register"}
-            className="underline hover:text-slate-700 transition-all"
+            className="underline hover:text-slate-200 transition-all"
           >
             Register
           </Link>

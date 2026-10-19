@@ -48,6 +48,12 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  --color-primary: #3F9647;
+  --color-secondary: #14579E
+
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

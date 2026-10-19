@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Eye, EyeClosed } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { cn } from "cn";
 
 interface IRegisterPage {
   title: string;
@@ -73,45 +74,131 @@ const Register = ({ title, description, countries }: IRegisterPage) => {
   }, [state]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+    <Card className="bg-linear-to-br from-secondary to-primary text-white shadow-2xl shadow-secondary">
+      <CardHeader className="space-x-4">
+        <CardTitle className="font-thin text-3xl">{title}</CardTitle>
+        <CardDescription className="font-light text-white">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form className="px-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2 mb-3">
-            <Label htmlFor="name">Name</Label>
-            <Input {...register("name")} id="name" type="text" />
-            {(formErrors.name?.message || state?.errors?.name?.[0]) && (
-              <span className="text-xs text-red-500">
-                {formErrors.name?.message || state.errors?.name?.[0]}
-              </span>
-            )}
+          <div className="flex flex-row gap-2">
+            <div className="flex flex-col gap-2 mb-3">
+              <Label htmlFor="name" className="font-light">
+                Name
+              </Label>
+              <Input
+                {...register("name")}
+                id="name"
+                type="text"
+                placeholder="Input Your Name"
+                className={cn(
+                  "bg-gray-700 placeholder:text-gray-400",
+                  (formErrors.name || state.errors?.name?.[0]) &&
+                    "ring-2 ring-red-500 focus-visible:ring-red-500",
+                )}
+              />
+              {(formErrors.name?.message || state?.errors?.name?.[0]) && (
+                <span className="text-xs text-red-500">
+                  {formErrors.name?.message || state.errors?.name?.[0]}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 mb-3">
+              <Label htmlFor="company_name" className="font-light">
+                Company Name
+              </Label>
+              <Input
+                {...register("company_name")}
+                id="company_name"
+                type="text"
+                placeholder="Input Your Company Name"
+                className={cn(
+                  "bg-gray-700 placeholder:text-gray-400",
+                  (formErrors.name || state.errors?.name?.[0]) &&
+                    "ring-2 ring-red-500 focus-visible:ring-red-500",
+                )}
+              />
+              {(formErrors.company_name?.message ||
+                state?.errors?.company_name?.[0]) && (
+                <span className="text-xs text-red-500">
+                  {formErrors.company_name?.message ||
+                    state.errors?.company_name?.[0]}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-2 mb-3">
-            <Label htmlFor="company_name">Company Name</Label>
-            <Input
-              {...register("company_name")}
-              id="company_name"
-              type="text"
-            />
-            {(formErrors.company_name?.message ||
-              state?.errors?.company_name?.[0]) && (
-              <span className="text-xs text-red-500">
-                {formErrors.company_name?.message ||
-                  state.errors?.company_name?.[0]}
-              </span>
-            )}
+          <div className="flex flex-row gap-2">
+            <div className="flex flex-col gap-2 mb-3">
+              <Label htmlFor="email" className="font-light">
+                Email
+              </Label>
+              <Input
+                {...register("email")}
+                id="email"
+                type="email"
+                placeholder="Input Your Email"
+                className={cn(
+                  "bg-gray-700 placeholder:text-gray-400",
+                  (formErrors.email || state.errors?.email?.[0]) &&
+                    "ring-2 ring-red-500 focus-visible:ring-red-500",
+                )}
+              />
+              {(formErrors.email?.message || state?.errors?.email?.[0]) && (
+                <span className="text-xs text-red-500">
+                  {formErrors.email?.message || state.errors?.email?.[0]}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 w-[55%]">
+              <Label htmlFor="password" className="font-light">
+                Password
+              </Label>
+              <div className="flex flex-row space-x-2">
+                <Input
+                  {...register("password")}
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Input Your Password"
+                  className={cn(
+                    "bg-gray-700 placeholder:text-gray-400",
+                    (formErrors.password || state.errors?.password?.[0]) &&
+                      "ring-2 ring-red-500 focus-visible:ring-red-500",
+                  )}
+                />
+                <Button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="bg-gray-700 hover:bg-gray-500"
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
+                </Button>
+              </div>
+              {(formErrors.password?.message ||
+                state?.errors?.password?.[0]) && (
+                <span className="text-xs text-red-500">
+                  {formErrors.password?.message || state.errors?.password?.[0]}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-2 mb-3">
-            <Label htmlFor="country_id">Country</Label>
+          <div className="flex flex-col gap-2 mb-3 relative">
+            <Label htmlFor="country_id" className="font-light">
+              Country
+            </Label>
             <select
               {...register("country")}
               id="country_id"
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              className={cn(
+                "bg-gray-700 flex h-9 w-full rounded-md border border-input appearance-none px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+                (formErrors.country || state.errors?.country?.[0]) &&
+                  "ring-2 ring-red-500 focus-visible:ring-red-500",
+              )}
             >
-              <option value="">Choose Your Country</option>
+              <option value="" className="text-gray-400">
+                Choose Your Country
+              </option>
               {countries.map((country) => (
                 <option value={country.id} key={country.id}>
                   {country.name} ({country.code})
@@ -124,43 +211,17 @@ const Register = ({ title, description, countries }: IRegisterPage) => {
               </span>
             )}
           </div>
-          <div className="flex flex-col gap-2 mb-3">
-            <Label htmlFor="email">Email</Label>
-            <Input {...register("email")} id="email" type="email" />
-            {(formErrors.email?.message || state?.errors?.email?.[0]) && (
-              <span className="text-xs text-red-500">
-                {formErrors.email?.message || state.errors?.email?.[0]}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-col gap-2 mt-2 mb-3">
-            <Label htmlFor="password">Password</Label>
-            <div className="flex flex-row space-x-2">
-              <Input
-                {...register("password")}
-                id="password"
-                type={showPassword ? "text" : "password"}
-              />
-              <Button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
-              </Button>
-            </div>
-            {(formErrors.password?.message || state?.errors?.password?.[0]) && (
-              <span className="text-xs text-red-500">
-                {formErrors.password?.message || state.errors?.password?.[0]}
-              </span>
-            )}
-          </div>
-          <Button className="mt-3 w-full" type="submit" disabled={isPending}>
+          <Button
+            className="mt-3 w-full bg-gray-700 hover:bg-gray-500"
+            type="submit"
+            disabled={isPending}
+          >
             {isPending ? <Spinner /> : "Register"}
           </Button>
         </form>
       </CardContent>
       <CardFooter className="flex justify-center">
-        <CardDescription>
+        <CardDescription className="text-light text-white">
           Already Have An Account?{" "}
           <Link
             href={"/auth/login"}
