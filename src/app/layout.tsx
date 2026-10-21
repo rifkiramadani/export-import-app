@@ -30,7 +30,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           className={`${geistSans.className} min-h-full flex flex-col`}
           suppressHydrationWarning
         >
-          <Navbar />
           {children}
           <Toaster />
         </body>

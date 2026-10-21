@@ -20,7 +20,7 @@ const HeroSearch = ({ categories, countries }: HeroSearchProps) => {
   const [categoryId, setCategoryId] = useState("all");
   const [countryId, setCountryId] = useState("all");
 
-  const handleSearchSubmit = (e: React.ChangeEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const targetRoute = type === "export" ? "/products" : "/import-requests";
@@ -66,7 +66,7 @@ const HeroSearch = ({ categories, countries }: HeroSearchProps) => {
         onChange={(e) => setCategoryId(e.target.value)}
         className="flex h-11 w-full text-white bg-gray-700 rounded-md border border-input px-3 py-1 text-sm shadow-sm focus-visible:outline-0 focus-visible:ring-1"
       >
-        <option value="">Choose Category</option>
+        <option value="all">All Categories</option>
         {categories.map((category) => (
           <option key={category.id} value={category.id}>
             {category.name}
@@ -79,7 +79,7 @@ const HeroSearch = ({ categories, countries }: HeroSearchProps) => {
         onChange={(e) => setCountryId(e.target.value)}
         className="flex h-11 w-full text-white bg-gray-700 rounded-md border border-input px-3 py-1 text-sm shadow-sm focus-visible:outline-0 focus-visible:ring-1"
       >
-        <option value="">Choose Country</option>
+        <option value="all">All Countries</option>
         {countries.map((country) => (
           <option key={country.id} value={country.id}>
             {country.name}
@@ -87,7 +87,10 @@ const HeroSearch = ({ categories, countries }: HeroSearchProps) => {
         ))}
       </select>
 
-      <Button className="h-11 w-full bg-gray-700 hover:bg-gray-500 sm:col-span-2 lg:col-span-1">
+      <Button
+        type="submit"
+        className="h-11 w-full bg-gray-700 hover:bg-gray-500 sm:col-span-2 lg:col-span-1"
+      >
         <Search size={16} />
         <span>Search Now</span>
       </Button>
