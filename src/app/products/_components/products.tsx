@@ -214,9 +214,9 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
         </div>
       )}
       {totalPages! > 1 && (
-        <div className="flex  justify-center items-center gap-4 mt-8">
+        <div className="flex justify-center items-center gap-4 mt-8">
           <Button
-            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all"
+            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all disabled:opacity-50"
             disabled={page === 1}
             onClick={() => setPage((p) => p - 1)}
           >
@@ -227,7 +227,7 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
             Page {page} From {totalPages}
           </span>
           <Button
-            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all"
+            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all disabled:opacity-50"
             disabled={page >= totalPages!}
             onClick={() => setPage((p) => p + 1)}
           >

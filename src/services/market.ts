@@ -10,7 +10,7 @@ export async function fetchMarketItems(params: MarketFilterParams) {
 
   // decide which table will be queried based on type of dropdown category (export | import)
   const tableName =
-    params.type === "export" ? "export_products" : "import_products";
+    params.type === "export" ? "export_products" : "import_requests";
 
   let query = supabase.from(tableName).select(
     `
