@@ -15,7 +15,7 @@ export const ActiveLink = ({ href, children }: ActiveLinkProps) => {
   return (
     <Link href={href}>
       <span
-        className={`cursor-pointer transition ${
+        className={`cursor-pointer transition font-thin hover:text-gray-400 ${
           isActive ? "cursor-pointer text-gray-400" : "text-white"
         }`}
       >

@@ -4,7 +4,7 @@ import { MarketFilterParams } from "@/types/market-filter-params";
 export async function fetchMarketItems(params: MarketFilterParams) {
   const supabase = createClient();
   const page = params.page || 1;
-  const limit = params.limit || 6;
+  const limit = params.limit || 1;
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -27,7 +27,7 @@ export async function fetchMarketItems(params: MarketFilterParams) {
   // filter based on (title or description)
   if (params.search) {
     query = query.or(
-      `title.ilike%${params.search}%, description.ilike%${params.search}%`,
+      `title.ilike.%${params.search}%,description.ilike.%${params.search}%`,
     );
   }
 
