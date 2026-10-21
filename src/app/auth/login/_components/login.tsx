@@ -94,7 +94,7 @@ const Login = ({ title, description }: ILoginPage) => {
               {...register("email")}
               id="email"
               type="email"
-              placeholder="Input your email..."
+              placeholder="Input Your Email"
               className={cn(
                 "placeholder:text-gray-400 bg-gray-700",
                 (formErrors.email || state.errors?.email?.[0]) &&
@@ -116,7 +116,7 @@ const Login = ({ title, description }: ILoginPage) => {
                 {...register("password")}
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Input your password..."
+                placeholder="Input Your Password"
                 className={cn(
                   "placeholder:text-gray-400 bg-gray-700",
                   (formErrors.password || state.errors?.password?.[0]) &&
