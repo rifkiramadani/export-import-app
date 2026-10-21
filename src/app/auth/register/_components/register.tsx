@@ -220,7 +220,7 @@ const Register = ({ title, description, countries }: IRegisterPage) => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex flex-col justify-center">
         <CardDescription className="text-light text-white">
           Already Have An Account?{" "}
           <Link
@@ -228,6 +228,15 @@ const Register = ({ title, description, countries }: IRegisterPage) => {
             className="underline hover:text-slate-700 transition-all"
           >
             Login
+          </Link>
+        </CardDescription>
+        <CardDescription className="text-white font-light">
+          Back To{" "}
+          <Link
+            href={"/"}
+            className="underline hover:text-slate-200 transition-all"
+          >
+            Landing Page
           </Link>
         </CardDescription>
       </CardFooter>

@@ -17,7 +17,7 @@ const Navbar = async () => {
       </div>
 
       {/* Nav links */}
-      <div className="flex flex-row justify-center gap-4 md:gap-6 font-light text-sm md:text-base whitespace-nowrap">
+      <div className="flex flex-row justify-center gap-4 md:gap-6 text-sm md:text-base whitespace-nowrap">
         <ActiveLink href="/">Home</ActiveLink>
         <ActiveLink href="/products">Products</ActiveLink>
         <ActiveLink href="/import-requests">Import Request</ActiveLink>

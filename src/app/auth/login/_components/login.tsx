@@ -146,7 +146,7 @@ const Login = ({ title, description }: ILoginPage) => {
           </Button>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex flex-col justify-center">
         <CardDescription className="text-white font-light">
           Not Have An Account?{" "}
           <Link
@@ -154,6 +154,15 @@ const Login = ({ title, description }: ILoginPage) => {
             className="underline hover:text-slate-200 transition-all"
           >
             Register
+          </Link>
+        </CardDescription>
+        <CardDescription className="text-white font-light">
+          Back To{" "}
+          <Link
+            href={"/"}
+            className="underline hover:text-slate-200 transition-all"
+          >
+            Landing Page
           </Link>
         </CardDescription>
       </CardFooter>
