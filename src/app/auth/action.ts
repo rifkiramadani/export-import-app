@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { loginSchema, registerSchema } from "@/lib/validations/auth";
+import { loginSchema, registerSchema } from "@/lib/validations/auth.schema";
 import { LoginFormState, RegisterFormState } from "@/types/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -91,4 +91,22 @@ export async function signUp(
 
   revalidatePath("/", "layout");
   redirect("/auth/login?message=Check Your Email For Account Verification");
+}
+
+export async function logOut() {
+  const supabase = await createClient();
+
+  try {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("Supabase sign out error: ", error);
+      return;
+    }
+  } catch (error) {
+    console.error("Error Signing Out: ", error);
+    return;
+  }
+  revalidatePath("/", "layout");
+  redirect("/auth/login");
 }

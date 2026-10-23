@@ -15,11 +15,11 @@ import { startTransition, useActionState, useEffect, useState } from "react";
 import { signUp } from "../../action";
 import { Country } from "@/types/country";
 import { useForm } from "react-hook-form";
-import { RegisterForm, registerSchema } from "@/lib/validations/auth";
+import { RegisterForm, registerSchema } from "@/lib/validations/auth.schema";
 import {
   INITIAL_REGISTER_FORM,
   INITIAL_STATE_REGISTER,
-} from "@/constants/auth";
+} from "@/constants/auth.constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import Link from "next/link";

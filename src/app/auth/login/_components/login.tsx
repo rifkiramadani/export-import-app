@@ -11,8 +11,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { INITIAL_LOGIN_FORM, INTIAL_STATE_LOGIN } from "@/constants/auth";
-import { LoginForm, loginSchema } from "@/lib/validations/auth";
+import {
+  INITIAL_LOGIN_FORM,
+  INTIAL_STATE_LOGIN,
+} from "@/constants/auth.constants";
+import { LoginForm, loginSchema } from "@/lib/validations/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startTransition, useActionState, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
