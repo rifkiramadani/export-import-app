@@ -6,6 +6,7 @@ import {
   useQueryClient,
   keepPreviousData,
 } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import { ImportRequest } from "@/types/import-request";
 import { Category } from "@/types/category";
 import { Country } from "@/types/country";
@@ -16,12 +17,14 @@ import type { DataTableFeatures } from "@/components/common/data-table";
 import type { ColumnDef, RowSelectionState } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { deleteImportRequests } from "../action";
 import Image from "next/image";
 import { ImportRequestsDialog } from "./import-requests-dialog";
 import { ImportRequestDeleteButton } from "./import-requests-delete-button";
 import { fetchUserImportRequests } from "../services/import-requests";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const priceFormatter = new Intl.NumberFormat("en-US");
 
@@ -51,11 +54,22 @@ export default function ImportRequestsPage({
   const queryClient = useQueryClient();
 
   const [page, setPageState] = useState<number>(initialPage);
+  const [search, setSearch] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("all");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [isDeleting, startDeleteTransition] = useTransition();
 
+  const debouncedSearch = useDebounce(search, 500);
+  const hasFilter = debouncedSearch.trim() !== "" || categoryId !== "all";
+
   const queryKeyFor = (p: number) =>
-    ["import-requests", profileId, pageSize, p] as const;
+    [
+      "import-requests",
+      profileId,
+      pageSize,
+      { search: debouncedSearch, categoryId },
+      p,
+    ] as const;
 
   const {
     data,
@@ -67,10 +81,17 @@ export default function ImportRequestsPage({
     refetch,
   } = useQuery({
     queryKey: queryKeyFor(page),
-    queryFn: () => fetchUserImportRequests(profileId, page, pageSize),
-    // Halaman yang dirender server dipakai sebagai data awal
+    queryFn: () =>
+      fetchUserImportRequests({
+        profileId,
+        page,
+        pageSize,
+        search: debouncedSearch,
+        categoryId,
+      }),
+    // Data dari server hanya valid untuk halaman awal tanpa filter
     initialData:
-      page === initialPage
+      page === initialPage && !hasFilter
         ? { data: initialRequests, totalPages: initialTotalPages }
         : undefined,
     staleTime: 60_000,
@@ -85,12 +106,19 @@ export default function ImportRequestsPage({
     if (page < totalPages) {
       queryClient.prefetchQuery({
         queryKey: queryKeyFor(page + 1),
-        queryFn: () => fetchUserImportRequests(profileId, page + 1, pageSize),
+        queryFn: () =>
+          fetchUserImportRequests({
+            profileId,
+            page: page + 1,
+            pageSize,
+            search: debouncedSearch,
+            categoryId,
+          }),
         staleTime: 60_000,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, totalPages, profileId, pageSize]);
+  }, [page, totalPages, profileId, pageSize, debouncedSearch, categoryId]);
 
   // Ganti halaman tanpa menjalankan ulang server component
   const setPage = (updater: number | ((p: number) => number)) => {
@@ -98,6 +126,16 @@ export default function ImportRequestsPage({
     setPageState(newPage);
     setRowSelection({});
     window.history.replaceState(null, "", `?page=${newPage}`);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCategoryId(value);
+    setPage(1);
   };
 
   const columns: ColumnDef<DataTableFeatures, ImportRequest>[] = [
@@ -234,6 +272,31 @@ export default function ImportRequestsPage({
           currencies={currencies}
           profileId={profileId}
         />
+      </div>
+
+      {/* Search & Filter: di luar blok loading agar input tidak kehilangan fokus */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative md:col-span-2">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          <Input
+            className="pl-9 h-10"
+            placeholder="Search by title or description..."
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+          />
+        </div>
+        <select
+          value={categoryId}
+          onChange={(e) => handleCategoryChange(e.target.value)}
+          className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-0 focus-visible:ring-1"
+        >
+          <option value="all">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {isError ? (

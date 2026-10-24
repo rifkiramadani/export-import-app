@@ -1,16 +1,26 @@
 import { createClient } from "@/lib/supabase/client";
 import { ExportProduct } from "@/types/export-product";
 
-export async function fetchUserExportProducts(
-  profileId: string,
-  page: number,
-  pageSize: number,
-) {
+interface FetchUserExportProductsParams {
+  profileId: string;
+  page: number;
+  pageSize: number;
+  search?: string;
+  categoryId?: string;
+}
+
+export async function fetchUserExportProducts({
+  profileId,
+  page,
+  pageSize,
+  search,
+  categoryId,
+}: FetchUserExportProductsParams) {
   const supabase = createClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, count, error } = await supabase
+  let query = supabase
     .from("export_products")
     .select(
       `
@@ -22,7 +32,19 @@ export async function fetchUserExportProducts(
     `,
       { count: "exact" },
     )
-    .eq("profile_id", profileId)
+    .eq("profile_id", profileId);
+
+  // Karakter , ( ) merusak sintaks filter .or(), jadi dibuang dari input
+  const keyword = search?.trim().replace(/[,()]/g, " ");
+  if (keyword) {
+    query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
+  }
+
+  if (categoryId && categoryId !== "all") {
+    query = query.eq("category_id", categoryId);
+  }
+
+  const { data, count, error } = await query
     .order("created_at", { ascending: false })
     .range(from, to);
 

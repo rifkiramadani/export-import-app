@@ -1,16 +1,26 @@
 import { createClient } from "@/lib/supabase/client";
 import { ImportRequest } from "@/types/import-request";
 
-export async function fetchUserImportRequests(
-  profileId: string,
-  page: number,
-  pageSize: number,
-) {
+interface FetchUserImportRequestsParams {
+  profileId: string;
+  page: number;
+  pageSize: number;
+  search?: string;
+  categoryId?: string;
+}
+
+export async function fetchUserImportRequests({
+  profileId,
+  page,
+  pageSize,
+  search,
+  categoryId,
+}: FetchUserImportRequestsParams) {
   const supabase = createClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  const { data, count, error } = await supabase
+  let query = supabase
     .from("import_requests")
     .select(
       `
@@ -22,7 +32,18 @@ export async function fetchUserImportRequests(
     `,
       { count: "exact" },
     )
-    .eq("profile_id", profileId)
+    .eq("profile_id", profileId);
+
+  const keyword = search?.trim().replace(/[,()]/g, " ");
+  if (keyword) {
+    query = query.or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`);
+  }
+
+  if (categoryId && categoryId !== "all") {
+    query = query.eq("category_id", categoryId);
+  }
+
+  const { data, count, error } = await query
     .order("created_at", { ascending: false })
     .range(from, to);
 

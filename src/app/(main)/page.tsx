@@ -1,5 +1,4 @@
 import HeroSearch from "@/components/common/hero-search";
-import Navbar from "@/components/common/navbar";
 import { getCategories, getCountries } from "@/services/master";
 
 const Home = async () => {
