@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -28,61 +29,52 @@ import { Category } from "@/types/category";
 import { Country } from "@/types/country";
 import { Unit } from "@/types/unit";
 import { Currency } from "@/types/currency";
-import {
-  ImportRequestForm,
-  importRequestSchema,
-} from "@/lib/validations/import-requests.schema";
+import { importRequestSchema } from "@/lib/validations/import-requests.schema";
 import {
   INITIAL_IMPORT_REQUEST_FORM,
   INITIAL_STATE_IMPORT_REQUEST,
 } from "@/constants/import-requests.constants";
 import { upsertImportRequest } from "../action";
 
+type ImportRequestFormInput = z.input<typeof importRequestSchema>;
+
 const BUCKET_NAME = "import_requests";
 
-// Fungsi untuk mengunggah gambar baru sekaligus menghapus gambar lama (jika ada)
-async function uploadAndReplaceImportImage(
+function getStoragePathFromUrl(url: string): string | null {
+  const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
+}
+
+async function uploadImportImage(
   supabase: SupabaseClient,
   file: File,
   profileId: string,
-  oldImageUrl?: string | null,
 ): Promise<string> {
-  // 1. Pastikan bucket tersedia
-  const { data: bucketData, error: bucketCheckError } =
-    await supabase.storage.getBucket(BUCKET_NAME);
-  if (bucketCheckError || !bucketData) {
-    await supabase.storage.createBucket(BUCKET_NAME, { public: true });
-  }
-
-  // 2. Hapus gambar lama dari storage jika ada untuk menghemat memori
-  if (oldImageUrl) {
-    try {
-      const urlObj = new URL(oldImageUrl);
-      const pathParts = urlObj.pathname.split(
-        `/storage/v1/object/public/${BUCKET_NAME}/`,
-      );
-      if (pathParts[1]) {
-        await supabase.storage
-          .from(BUCKET_NAME)
-          .remove([decodeURIComponent(pathParts[1])]);
-      }
-    } catch (e) {
-      console.error("Gagal menghapus gambar lama:", e);
-    }
-  }
-
-  // 3. Upload gambar baru
   const ext = file.name.split(".").pop();
   const path = `${profileId}/${crypto.randomUUID()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET_NAME)
-    .upload(path, file, { upsert: true });
+    .upload(path, file);
 
   if (uploadError) throw uploadError;
 
   const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
   return data.publicUrl;
+}
+
+async function removeImportImage(
+  supabase: SupabaseClient,
+  imageUrl?: string | null,
+): Promise<void> {
+  if (!imageUrl) return;
+  const path = getStoragePathFromUrl(imageUrl);
+  if (!path) return;
+
+  const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+  if (error) console.error("Gagal menghapus gambar:", error.message);
 }
 
 interface ImportRequestDialogProps {
@@ -104,6 +96,7 @@ export function ImportRequestsDialog({
 }: ImportRequestDialogProps) {
   const [open, setOpen] = useState<boolean>(false);
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(
@@ -123,10 +116,10 @@ export function ImportRequestsDialog({
     setValue,
     reset,
     formState: { errors: formErrors },
-  } = useForm<ImportRequestForm>({
+  } = useForm<ImportRequestFormInput>({
     resolver: zodResolver(
       importRequestSchema,
-    ) as unknown as Resolver<ImportRequestForm>,
+    ) as unknown as Resolver<ImportRequestFormInput>,
     defaultValues: {
       title: request?.title ?? INITIAL_IMPORT_REQUEST_FORM.title,
       description:
@@ -156,19 +149,17 @@ export function ImportRequestsDialog({
     setImagePreview(URL.createObjectURL(file));
   };
 
-  const onSubmit = async (data: ImportRequestForm) => {
+  const onSubmit = async (data: ImportRequestFormInput) => {
     setIsUploading(true);
     try {
-      let finalImageUrl = request?.image_url ?? "";
+      const oldImageUrl = request?.image_url ?? null;
+      let finalImageUrl = oldImageUrl ?? "";
+      let uploadedNewImage = false;
 
-      // Jika user memilih file gambar baru, lakukan upload & hapus gambar lama
+      // 1. Upload gambar baru lebih dulu (gambar lama belum disentuh)
       if (imageFile) {
-        finalImageUrl = await uploadAndReplaceImportImage(
-          supabase,
-          imageFile,
-          profileId,
-          request?.image_url,
-        );
+        finalImageUrl = await uploadImportImage(supabase, imageFile, profileId);
+        uploadedNewImage = true;
         setValue("image_url", finalImageUrl, { shouldValidate: true });
       }
 
@@ -193,17 +184,37 @@ export function ImportRequestsDialog({
         setState(result);
 
         if (result?.status === "success") {
+          // 2. Simpan sukses -> baru hapus gambar lama
+          if (uploadedNewImage && oldImageUrl) {
+            await removeImportImage(supabase, oldImageUrl);
+          }
+          setImageFile(null);
+
           toast.success(
             isEditMode
               ? "Import request updated successfully!"
               : "Import request created successfully!",
           );
           setOpen(false);
-          if (!isEditMode) reset();
-        } else if (result?.status === "error" && result.errors?._form?.[0]) {
-          toast.error("Operation Failed", {
-            description: result.errors._form[0],
+          if (!isEditMode) {
+            reset();
+            setImagePreview("");
+          }
+
+          // 3. Segarkan cache tabel
+          await queryClient.invalidateQueries({
+            queryKey: ["import-requests"],
           });
+        } else {
+          // Simpan gagal -> rollback gambar baru agar tidak jadi file yatim
+          if (uploadedNewImage) {
+            await removeImportImage(supabase, finalImageUrl);
+          }
+          if (result?.status === "error" && result.errors?._form?.[0]) {
+            toast.error("Operation Failed", {
+              description: result.errors._form[0],
+            });
+          }
         }
       });
     } catch (err: unknown) {

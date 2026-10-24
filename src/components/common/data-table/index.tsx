@@ -10,6 +10,7 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import type { RowSelectionState } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import {
   Table,
@@ -43,6 +44,9 @@ interface DataTableProps<TData extends { id: string }> {
   setRowSelection: React.Dispatch<React.SetStateAction<RowSelectionState>>;
   onBulkDelete?: (selectedIds: string[]) => void;
   isDeleting?: boolean;
+  page?: number;
+  setPage?: React.Dispatch<React.SetStateAction<number>>;
+  totalPages?: number;
 }
 
 export function DataTable<TData extends { id: string }>({
@@ -52,15 +56,17 @@ export function DataTable<TData extends { id: string }>({
   setRowSelection,
   onBulkDelete,
   isDeleting,
+  page = 1,
+  setPage,
+  totalPages = 1,
 }: DataTableProps<TData>) {
   // v9: useReactTable -> useTable, getCoreRowModel tidak perlu lagi (otomatis)
   const table = useTable({
     features,
     columns,
     data,
-    state: {
-      rowSelection,
-    },
+    manualPagination: true,
+    state: { rowSelection },
     onRowSelectionChange: setRowSelection,
     getRowId: (row) => row.id,
   });
@@ -143,24 +149,29 @@ export function DataTable<TData extends { id: string }>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-end space-x-2 py-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      {totalPages > 1 && setPage && (
+        <div className="flex justify-center items-center gap-4 mt-8">
+          <Button
+            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all disabled:opacity-50"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            <ChevronLeft size={22} />
+            Prev
+          </Button>
+          <span className="text-sm font-light text-slate-600">
+            Page {page} From {totalPages}
+          </span>
+          <Button
+            className="flex flex-row bg-gray-700 hover:bg-gray-500 text-white p-2 rounded-md text-sm font-light items-center transition-all disabled:opacity-50"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+            <ChevronRight size={22} />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

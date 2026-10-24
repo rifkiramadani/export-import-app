@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { deleteImportRequests } from "../action";
 
-interface DeleteImportRequestButtonProps {
+interface ImportRequestDeleteButtonProps {
   requestId: string;
   requestTitle: string;
 }
@@ -23,7 +24,8 @@ interface DeleteImportRequestButtonProps {
 export function ImportRequestDeleteButton({
   requestId,
   requestTitle,
-}: DeleteImportRequestButtonProps) {
+}: ImportRequestDeleteButtonProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState<boolean>(false);
   const [isDeleting, startDeleteTransition] = useTransition();
 
@@ -33,6 +35,7 @@ export function ImportRequestDeleteButton({
       if (res.success) {
         toast.success("Import request deleted successfully!");
         setOpen(false);
+        await queryClient.invalidateQueries({ queryKey: ["import-requests"] });
       } else {
         toast.error("Failed to delete import request", {
           description: res.message,

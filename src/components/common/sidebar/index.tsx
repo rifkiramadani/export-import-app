@@ -43,12 +43,12 @@ export function AppSidebar({ role }: { role: "admin" | "user" }) {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="p-4">
           <SidebarGroupLabel className="text-white/50 uppercase tracking-wider">
             Management
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {menuItems.map((item) => {
                 const Icon = item.icons;
                 const isActive =
@@ -73,13 +73,13 @@ export function AppSidebar({ role }: { role: "admin" | "user" }) {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-white/10">
+      <SidebarFooter className="border-t border-white/10 p-4">
         <SidebarGroup className="p-0">
           <SidebarGroupLabel className="text-white/50 uppercase tracking-wider">
             Quick Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {QUICK_LINKS.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton

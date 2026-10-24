@@ -59,7 +59,7 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
         categoryId,
         countryId,
         page,
-        limit: 6, //limit
+        limit: 1, //limit
       }),
   });
 
