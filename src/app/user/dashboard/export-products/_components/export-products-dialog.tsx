@@ -28,41 +28,53 @@ import { Category } from "@/types/category";
 import { Country } from "@/types/country";
 import { Unit } from "@/types/unit";
 import { Currency } from "@/types/currency";
-import { exportProductSchema } from "@/lib/validations/export-products.schema";
+import {
+  ExportProductForm,
+  exportProductSchema,
+} from "@/lib/validations/export-products.schema";
 import {
   INITIAL_EXPORT_PRODUCT_FORM,
   INITIAL_STATE_EXPORT_PRODUCT,
 } from "@/constants/export-products.constants";
 import { upsertProduct } from "../action";
 
-// Tipe nilai di form (sebelum validasi/coerce): price & min_order = unknown
-type ExportProductFormInput = z.input<typeof exportProductSchema>;
-
 const BUCKET_NAME = "export_products";
 
-// Dipindah ke luar komponen agar tidak memicu error "impure function" (Date.now)
+function getStoragePathFromUrl(url: string): string | null {
+  const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+  const index = url.indexOf(marker);
+  if (index === -1) return null;
+  return decodeURIComponent(url.slice(index + marker.length).split("?")[0]);
+}
+
 async function uploadProductImage(
   supabase: SupabaseClient,
   file: File,
   profileId: string,
 ): Promise<string> {
-  const { data: bucketData, error: bucketCheckError } =
-    await supabase.storage.getBucket(BUCKET_NAME);
-  if (bucketCheckError || !bucketData) {
-    await supabase.storage.createBucket(BUCKET_NAME, { public: true });
-  }
-
   const ext = file.name.split(".").pop();
   const path = `${profileId}/${crypto.randomUUID()}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET_NAME)
-    .upload(path, file, { upsert: true });
+    .upload(path, file);
 
   if (uploadError) throw uploadError;
 
   const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
   return data.publicUrl;
+}
+
+async function removeProductImage(
+  supabase: SupabaseClient,
+  imageUrl?: string | null,
+): Promise<void> {
+  if (!imageUrl) return;
+  const path = getStoragePathFromUrl(imageUrl);
+  if (!path) return;
+
+  const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+  if (error) console.error("Gagal menghapus gambar:", error.message);
 }
 
 interface ExportProductDialogProps {
@@ -103,10 +115,10 @@ export function ExportProductsDialog({
     setValue,
     reset,
     formState: { errors: formErrors },
-  } = useForm<ExportProductFormInput>({
+  } = useForm<ExportProductForm>({
     resolver: zodResolver(
       exportProductSchema,
-    ) as unknown as Resolver<ExportProductFormInput>,
+    ) as unknown as Resolver<ExportProductForm>,
     defaultValues: {
       title: product?.title ?? INITIAL_EXPORT_PRODUCT_FORM.title,
       description:
@@ -139,17 +151,21 @@ export function ExportProductsDialog({
     setImagePreview(URL.createObjectURL(file));
   };
 
-  const onSubmit = async (data: ExportProductFormInput) => {
+  const onSubmit = async (data: ExportProductForm) => {
     setIsUploading(true);
     try {
-      let finalImageUrl = product?.image_url ?? "";
+      const oldImageUrl = product?.image_url ?? null;
+      let finalImageUrl = oldImageUrl ?? "";
+      let uploadedNewImage = false;
 
+      // 1. Upload gambar baru lebih dulu (gambar lama belum disentuh)
       if (imageFile) {
         finalImageUrl = await uploadProductImage(
           supabase,
           imageFile,
           profileId,
         );
+        uploadedNewImage = true;
         setValue("image_url", finalImageUrl, { shouldValidate: true });
       }
 
@@ -175,17 +191,32 @@ export function ExportProductsDialog({
         setState(result);
 
         if (result?.status === "success") {
+          // 2. Simpan sukses -> baru hapus gambar lama
+          if (uploadedNewImage && oldImageUrl) {
+            await removeProductImage(supabase, oldImageUrl);
+          }
+          setImageFile(null);
+
           toast.success(
             isEditMode
               ? "Product updated successfully!"
               : "Product created successfully!",
           );
           setOpen(false);
-          if (!isEditMode) reset();
-        } else if (result?.status === "error" && result.errors?._form?.[0]) {
-          toast.error("Operation Failed", {
-            description: result.errors._form[0],
-          });
+          if (!isEditMode) {
+            reset();
+            setImagePreview("");
+          }
+        } else {
+          // 3. Simpan gagal -> rollback gambar baru agar tidak jadi file yatim
+          if (uploadedNewImage) {
+            await removeProductImage(supabase, finalImageUrl);
+          }
+          if (result?.status === "error" && result.errors?._form?.[0]) {
+            toast.error("Operation Failed", {
+              description: result.errors._form[0],
+            });
+          }
         }
       });
     } catch (err: unknown) {
@@ -321,6 +352,7 @@ export function ExportProductsDialog({
                   </span>
                 )}
               </div>
+
               <div className="space-y-1">
                 <Label htmlFor="quantity">Quantity</Label>
                 <Input
