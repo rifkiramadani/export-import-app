@@ -21,18 +21,21 @@ export default async function UserDashboardLayout({
     redirect("/auth/login");
   }
 
-  // Role diambil dari tabel profiles (bukan app_metadata)
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  const role: "admin" | "user" = profile?.role === "admin" ? "admin" : "user";
+  // Opsi: Jika admin masuk ke rute user, arahkan otomatis ke dashboard admin
+  if (profile?.role === "admin") {
+    redirect("/admin/dashboard/profile");
+  }
+
+  const role = "user"; // Karena sudah diproteksi, di sini pasti user
 
   return (
     <SidebarProvider
-      // warna teks & state sidebar disesuaikan dengan background gradient
       style={
         {
           "--sidebar-foreground": "oklch(1 0 0)",

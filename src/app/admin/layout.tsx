@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/common/sidebar";
 
-export default async function UserDashboardLayout({
+export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -21,18 +21,22 @@ export default async function UserDashboardLayout({
     redirect("/auth/login");
   }
 
-  // Role diambil dari tabel profiles (bukan app_metadata)
+  // Ambil role dari tabel profiles
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  const role: "admin" | "user" = profile?.role === "admin" ? "admin" : "user";
+  // PROTEKSI UTAMA: Jika bukan admin, tendang keluar ke dashboard user
+  if (profile?.role !== "admin") {
+    redirect("/user/dashboard/profile");
+  }
+
+  const role = "admin"; // Karena sudah diproteksi, di sini pasti admin
 
   return (
     <SidebarProvider
-      // warna teks & state sidebar disesuaikan dengan background gradient
       style={
         {
           "--sidebar-foreground": "oklch(1 0 0)",
