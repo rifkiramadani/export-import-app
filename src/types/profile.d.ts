@@ -10,6 +10,7 @@ export interface Profile {
   banner_url: string | null;
   country_id: string | null;
   whatsapp: string | null;
+  password: string | null;
   created_at: string;
   country?: Country | null;
 }
@@ -24,6 +25,7 @@ export type ProfileFormState = {
     banner_url?: string[];
     country_id?: string[];
     whatsapp?: string[];
+    password?: string[];
     _form?: string[];
   };
 };

@@ -8,6 +8,7 @@ export const INITIAL_PROFILE_FORM = {
   banner_url: "",
   country_id: "",
   whatsapp: "",
+  password: "",
 };
 
 export const INITIAL_STATE_PROFILE: ProfileFormState = {
@@ -20,6 +21,7 @@ export const INITIAL_STATE_PROFILE: ProfileFormState = {
     banner_url: [],
     country_id: [],
     whatsapp: [],
+    password: [],
     _form: [],
   },
 };

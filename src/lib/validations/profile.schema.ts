@@ -20,6 +20,12 @@ export const profileSchema = z.object({
     .optional()
     .nullable(),
   whatsapp: z.string().optional(),
+  password: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((val) => !val || val.length >= 6, {
+      message: "Password must be at least 6 characters",
+    }),
 });
-
 export type ProfileForm = z.infer<typeof profileSchema>;

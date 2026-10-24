@@ -45,7 +45,7 @@ const HeroSearch = ({ categories, countries }: HeroSearchProps) => {
       <div className="relative">
         <Search className="absolute left-3 top-3.5 h-4 w-4 text-white" />
         <Input
-          className="pl-9 h-11 placeholder:text-gray-400 bg-gray-700"
+          className="pl-9 h-11 text-white placeholder:text-gray-400 bg-gray-700"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}

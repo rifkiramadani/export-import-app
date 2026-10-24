@@ -30,5 +30,11 @@ export default async function UserProfilePage() {
 
   const countries = await getCountries();
 
-  return <ProfileUser profile={profile} countries={countries} />;
+  return (
+    <ProfileUser
+      profile={profile}
+      countries={countries}
+      email={user.email ?? ""}
+    />
+  );
 }

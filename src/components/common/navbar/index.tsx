@@ -45,24 +45,26 @@ const Navbar = async () => {
       <div className="flex flex-row gap-2 justify-center md:justify-end">
         {user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button className="flex items-center gap-2 focus:outline-none rounded-full ring-offset-background transition-all hover:opacity-80 p-0 h-10 w-10">
-                <Avatar className="h-10 w-10">
-                  {profile?.avatar_url ? (
-                    <AvatarImage
-                      src={profile?.avatar_url}
-                      alt={profile?.name || "Avatar"}
-                      className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                    />
-                  ) : (
-                    <AvatarFallback className="flex rounded-full bg-gray-500 text-white items-center justify-center font-light text-sm">
-                      {profile?.name?.[0]?.toUpperCase() ||
-                        user.email?.[0]?.toUpperCase() ||
-                        "U"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-              </Button>
+            <DropdownMenuTrigger
+              render={
+                <Button className="flex items-center gap-2 focus:outline-none rounded-full ring-offset-background transition-all hover:opacity-80 p-0 h-10 w-10" />
+              }
+            >
+              <Avatar className="h-10 w-10">
+                {profile?.avatar_url ? (
+                  <AvatarImage
+                    src={profile?.avatar_url}
+                    alt={profile?.name || "Avatar"}
+                    className="w-10 h-10 rounded-full object-cover border border-slate-200"
+                  />
+                ) : (
+                  <AvatarFallback className="flex rounded-full bg-gray-500 text-white items-center justify-center font-light text-sm">
+                    {profile?.name?.[0]?.toUpperCase() ||
+                      user.email?.[0]?.toUpperCase() ||
+                      "U"}
+                  </AvatarFallback>
+                )}
+              </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 p-2">
               <div className="px-2 py-1.5 text-center text-xs text-slate-500 font-medium truncate">

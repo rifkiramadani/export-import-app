@@ -11,10 +11,6 @@ const BANNER_BUCKET = "banners";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
-// Ambil path file di dalam bucket dari public URL Supabase.
-// Contoh: https://xxx.supabase.co/storage/v1/object/public/banners/<user-id>/123.png
-//         -> "<user-id>/123.png"
-// Mengembalikan null jika URL bukan milik bucket ini, atau file bukan milik user.
 function getStoragePath(
   url: string,
   bucket: string,
@@ -28,12 +24,9 @@ function getStoragePath(
     url.slice(index + marker.length).split("?")[0],
   );
 
-  // Pengaman tambahan: hanya hapus file di folder milik user ini
   return path.startsWith(`${userId}/`) ? path : null;
 }
 
-// Hapus file lama dari storage jika URL-nya berubah.
-// Kegagalan menghapus tidak menggagalkan update profil (hanya dicatat di log).
 async function removeOldFile(
   supabase: SupabaseServerClient,
   bucket: string,
@@ -80,6 +73,7 @@ export async function updateProfile(
     banner_url: formData.get("banner_url") as string,
     country_id: formData.get("country_id") as string,
     whatsapp: formData.get("whatsapp") as string,
+    password: formData.get("password") as string,
   };
 
   const validated = profileSchema.safeParse(rawData);
@@ -90,7 +84,6 @@ export async function updateProfile(
     };
   }
 
-  // Simpan URL lama sebelum di-update, supaya file lamanya bisa dihapus
   const { data: oldProfile } = await supabase
     .from("profiles")
     .select("avatar_url, banner_url")
@@ -100,6 +93,7 @@ export async function updateProfile(
   const newAvatarUrl = validated.data.avatar_url || null;
   const newBannerUrl = validated.data.banner_url || null;
 
+  // 1. Update database profile
   const { data: updated, error } = await supabase
     .from("profiles")
     .update({
@@ -124,7 +118,6 @@ export async function updateProfile(
     };
   }
 
-  // Update yang diblokir RLS tidak melempar error, hanya 0 baris yang berubah
   if (!updated || updated.length === 0) {
     return {
       status: "error",
@@ -135,7 +128,23 @@ export async function updateProfile(
     };
   }
 
-  // Database sudah berhasil diupdate, baru hapus file lama di storage
+  // 2. Update password auth jika diisi
+  if (validated.data.password && validated.data.password.trim() !== "") {
+    const { error: passwordError } = await supabase.auth.updateUser({
+      password: validated.data.password,
+    });
+
+    if (passwordError) {
+      return {
+        status: "error",
+        errors: {
+          ...prevState.errors,
+          _form: [passwordError.message],
+        },
+      };
+    }
+  }
+
   await Promise.all([
     removeOldFile(
       supabase,
@@ -164,6 +173,7 @@ export async function updateProfile(
       banner_url: [],
       country_id: [],
       whatsapp: [],
+      password: [],
       _form: [],
     },
   };

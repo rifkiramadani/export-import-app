@@ -17,16 +17,15 @@ import { updateProfile } from "../action";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { UploadCloud } from "lucide-react";
+import { Eye, EyeClosed, UploadCloud } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 interface IProfileProps {
   profile: Profile;
   countries: Country[];
+  email: string;
 }
 
-// Helper di luar komponen (bukan saat render), jadi Date.now() aman dipakai.
-// Path file harus diawali folder <user-id>/ agar cocok dengan policy storage.
 async function uploadImage(
   supabase: SupabaseClient,
   bucket: string,
@@ -34,7 +33,7 @@ async function uploadImage(
   file: File,
 ): Promise<string> {
   const ext = file.name.split(".").pop();
-  const path = `${userId}/${Date.now()}.${ext}`;
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
 
   const { error } = await supabase.storage.from(bucket).upload(path, file);
   if (error) throw error;
@@ -42,15 +41,15 @@ async function uploadImage(
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
-const ProfileUser = ({ countries, profile }: IProfileProps) => {
+const ProfileUser = ({ countries, profile, email }: IProfileProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   const supabase = createClient();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // File asli yang dipilih user, baru diupload saat tombol Save ditekan
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
-  // Preview gambar di UI
   const [avatarPreview, setAvatarPreview] = useState<string>(
     profile.avatar_url ?? "",
   );
@@ -72,6 +71,7 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
       banner_url: profile.banner_url ?? "",
       country_id: profile.country_id ?? "",
       whatsapp: profile.whatsapp ?? "",
+      password: "",
     },
   });
 
@@ -80,7 +80,6 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
     INITIAL_STATE_PROFILE,
   );
 
-  // Saat file dipilih: hanya buat preview lokal, belum upload
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
@@ -93,7 +92,6 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
     setPreview(URL.createObjectURL(file));
   };
 
-  // Saat Save: upload gambar (jika ada yang baru), lalu kirim data ke server action
   const onSubmit = async (data: ProfileForm) => {
     setIsSubmitting(true);
     try {
@@ -125,6 +123,9 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
       formData.append("country_id", data.country_id ?? "");
       formData.append("avatar_url", finalAvatarUrl);
       formData.append("banner_url", finalBannerUrl);
+      if (data.password) {
+        formData.append("password", data.password);
+      }
 
       startTransition(() => {
         formAction(formData);
@@ -139,7 +140,6 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
     }
   };
 
-  // Toaster feedback
   useEffect(() => {
     if (state?.status === "error" && state.errors?._form?.[0]) {
       toast.error("Update Failed", {
@@ -161,7 +161,7 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
-        {/* Banner (bucket: banners) */}
+        {/* Banner */}
         <div className="flex flex-col gap-2">
           <Label className="font-light">Profile Banner Preview</Label>
           <div className="relative w-full h-48 rounded-xl overflow-hidden bg-gray-700 border border-gray-600 flex items-center justify-center shadow-md">
@@ -200,7 +200,7 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
           )}
         </div>
 
-        {/* Avatar & identitas utama (bucket: profiles) */}
+        {/* Avatar & Identitas Utama */}
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <div className="flex flex-col items-center gap-2">
             <Label className="font-light">Avatar</Label>
@@ -234,6 +234,54 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
           </div>
 
           <div className="flex-1 w-full space-y-4">
+            <div className="flex flex-row gap-4">
+              <div className="flex flex-col gap-2 w-full">
+                <Label htmlFor="email" className="font-light">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  disabled
+                  value={email}
+                  className="bg-gray-800 text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2 w-full">
+                <Label htmlFor="password" className="font-light">
+                  Password (Optional)
+                </Label>
+                <div className="flex flex-row">
+                  <Input
+                    {...register("password")}
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Leave blank to keep current"
+                    className={cn(
+                      "bg-gray-700 text-white placeholder:text-gray-400",
+                      (formErrors.password || state?.errors?.password?.[0]) &&
+                        "ring-2 ring-red-500",
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className=" bg-gray-700 hover:bg-gray-500"
+                  >
+                    {showPassword ? <Eye size={18} /> : <EyeClosed size={18} />}
+                  </Button>
+                </div>
+                {(formErrors.password?.message ||
+                  state?.errors?.password?.[0]) && (
+                  <span className="text-xs text-red-500">
+                    {formErrors.password?.message ||
+                      state?.errors?.password?.[0]}
+                  </span>
+                )}
+              </div>
+            </div>
+
             <div className="flex flex-row gap-4">
               <div className="flex flex-col gap-2 w-full">
                 <Label htmlFor="name" className="font-light">
