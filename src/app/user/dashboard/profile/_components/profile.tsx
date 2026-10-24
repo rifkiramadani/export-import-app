@@ -151,7 +151,7 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
   }, [state]);
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-slate-900">Your Profile</h1>
         <p className="text-slate-600 font-light">
@@ -160,7 +160,7 @@ const ProfileUser = ({ countries, profile }: IProfileProps) => {
         </p>
       </div>
 
-      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
         {/* Banner (bucket: banners) */}
         <div className="flex flex-col gap-2">
           <Label className="font-light">Profile Banner Preview</Label>

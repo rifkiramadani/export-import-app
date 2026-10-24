@@ -37,7 +37,6 @@ export function AppSidebar({ role }: { role: "admin" | "user" }) {
     <Sidebar
       collapsible="offcanvas"
       // gradient dipasang ke panel dalam sidebar
-      className="**:data-[sidebar=sidebar]:bg-linear-to-bl **:data-[sidebar=sidebar]:from-secondary **:data-[sidebar=sidebar]:to-primary"
     >
       <SidebarHeader className="h-16 justify-center border-b border-white/10 px-6">
         <span className="text-lg font-semibold">Dashboard Panel</span>

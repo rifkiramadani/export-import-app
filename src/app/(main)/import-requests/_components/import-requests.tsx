@@ -62,7 +62,7 @@ const ImportRequestPage = ({
         categoryId,
         countryId,
         page,
-        limit: 1,
+        limit: 6,
       }),
   });
 

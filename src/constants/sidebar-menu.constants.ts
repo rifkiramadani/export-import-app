@@ -60,7 +60,7 @@ export const USER_SIDEBAR_MENU_ITEM = {
     },
     {
       title: "Your Products",
-      href: "/user/dashboard/products",
+      href: "/user/dashboard/export-products",
       icons: Package,
     },
     {
