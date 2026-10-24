@@ -48,7 +48,7 @@ export const USER_SIDEBAR_MENU_ITEM = {
     },
     {
       title: "Currencies",
-      href: "/admin/dashboard/Currencies",
+      href: "/admin/dashboard/currencies",
       icons: BadgeDollarSign,
     },
   ],
