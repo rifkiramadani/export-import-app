@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -24,6 +25,7 @@ export function ExportProductDeleteButton({
   productId,
   productTitle,
 }: DeleteProductButtonProps) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState<boolean>(false);
   const [isDeleting, startDeleteTransition] = useTransition();
 
@@ -33,6 +35,9 @@ export function ExportProductDeleteButton({
       if (res.success) {
         toast.success("Product deleted successfully!");
         setOpen(false);
+        await queryClient.invalidateQueries({
+          queryKey: ["user-export-products"],
+        });
       } else {
         toast.error("Failed to delete product", {
           description: res.message,

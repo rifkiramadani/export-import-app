@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import Image from "next/image";
 import { UploadCloud, Plus, Edit2 } from "lucide-react";
@@ -95,6 +96,7 @@ export function ExportProductsDialog({
 }: ExportProductDialogProps) {
   const [open, setOpen] = useState<boolean>(false);
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>(
@@ -206,8 +208,13 @@ export function ExportProductsDialog({
             reset();
             setImagePreview("");
           }
+
+          // 3. Segarkan cache tabel
+          await queryClient.invalidateQueries({
+            queryKey: ["user-export-products"],
+          });
         } else {
-          // 3. Simpan gagal -> rollback gambar baru agar tidak jadi file yatim
+          // Simpan gagal -> rollback gambar baru agar tidak jadi file yatim
           if (uploadedNewImage) {
             await removeProductImage(supabase, finalImageUrl);
           }
