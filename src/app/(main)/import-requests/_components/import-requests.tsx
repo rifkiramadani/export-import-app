@@ -9,16 +9,25 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useDebounce } from "@/hooks/use-debounce";
 import { fetchMarketItems } from "@/services/market";
 import { Category } from "@/types/category";
 import { Country } from "@/types/country";
-import { Button } from "@base-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
   Globe,
+  Info,
   MessageSquare,
   ShoppingCart,
   Search,
@@ -89,7 +98,7 @@ const ImportRequestPage = ({
         </p>
       </div>
 
-      {/* Filter Bar dengan style persis pilihanmu */}
+      {/* Filter Bar */}
       <div className="bg-linear-to-br items-center from-secondary to-primary p-4 rounded-xl shadow-sm border border-slate-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
         <h2 className="text-lg sm:text-xl font-semibold text-white sm:col-span-2 lg:col-span-1">
           Specify <br />
@@ -182,7 +191,7 @@ const ImportRequestPage = ({
                     {item.title}
                   </CardTitle>
                   <p className="text-xs text-slate-500">
-                    Oleh:{" "}
+                    By:{" "}
                     <span className="font-semibold text-slate-700">
                       {item.profile?.company_name || item.profile?.name}
                     </span>
@@ -202,16 +211,117 @@ const ImportRequestPage = ({
                   </div>
                 </CardContent>
               </div>
-              <CardFooter className="pt-0">
+
+              {/* Footer dengan Tombol Detail dan WhatsApp */}
+              <CardFooter className="pt-2 flex gap-2">
+                <Dialog>
+                  <DialogTrigger
+                    render={
+                      <Button
+                        variant="outline"
+                        className="flex justify-center flex-row h-9 items-center gap-2 rounded-md px-3 border border-slate-300"
+                      >
+                        <Info size={16} />
+                        <span>Detail</span>
+                      </Button>
+                    }
+                  ></DialogTrigger>
+                  <DialogContent className="bg-white text-slate-900 max-w-lg max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-bold">
+                        {item.title}
+                      </DialogTitle>
+                      <DialogDescription className="text-xs text-slate-500">
+                        Detailed specification and import request information.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 pt-2 text-sm">
+                      {item.image_url && (
+                        <div className="relative h-56 w-full rounded-lg overflow-hidden bg-slate-100">
+                          <Image
+                            src={item.image_url}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div>
+                          <span className="text-xs text-slate-500 block">
+                            Category
+                          </span>
+                          <span className="font-semibold text-slate-800">
+                            {item.category?.name || "-"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-xs text-slate-500 block">
+                            Country
+                          </span>
+                          <span className="font-semibold text-slate-800">
+                            {item.country?.name || "-"} ({item.country?.code})
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-xs text-slate-500 block">
+                            Est. Price
+                          </span>
+                          <span className="font-semibold text-emerald-700">
+                            {item.currency?.symbol}{" "}
+                            {Number(item.price).toLocaleString()} /{" "}
+                            {item.unit?.name}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-xs text-slate-500 block">
+                            Target Quantity
+                          </span>
+                          <span className="font-semibold text-slate-800">
+                            {item.target_quantity} {item.unit?.name}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-xs text-slate-500 block mb-1">
+                          Description
+                        </span>
+                        <p className="text-slate-700 text-sm bg-white p-3 rounded-lg border border-slate-100 leading-relaxed">
+                          {item.description || "No description provided."}
+                        </p>
+                      </div>
+
+                      <div className="border-t pt-3">
+                        <span className="text-xs text-slate-500 block mb-1">
+                          Importer / Company
+                        </span>
+                        <div className="font-medium text-slate-900">
+                          {item.profile?.company_name ||
+                            item.profile?.name ||
+                            "Unknown Importer"}
+                        </div>
+                        {item.profile?.whatsapp && (
+                          <div className="text-xs text-slate-500 mt-0.5">
+                            WhatsApp: {item.profile.whatsapp}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <a
                   href={`https://wa.me/${item.whatsapp_number}?text=Hi%2C%20I'm%20Interested%20To%20Supply%20For%20Request%20${encodeURIComponent(item.title)}.`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full"
+                  className="flex-1"
                 >
                   <Button className="flex justify-center flex-row w-full h-9 items-center bg-emerald-600 hover:bg-emerald-700 text-white gap-2 rounded-md">
                     <MessageSquare size={16} />
-                    <Label>Message Whatsapp</Label>
+                    <Label className="cursor-pointer">Message Whatsapp</Label>
                   </Button>
                 </a>
               </CardFooter>

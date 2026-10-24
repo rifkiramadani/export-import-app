@@ -185,7 +185,7 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
                     {item.title}
                   </CardTitle>
                   <p className="text-xs text-slate-500">
-                    Oleh:{" "}
+                    By:{" "}
                     <span className="font-semibold text-slate-700">
                       {item.profile?.company_name || item.profile?.name}
                     </span>
