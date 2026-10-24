@@ -18,7 +18,7 @@ export const USER_SIDEBAR_MENU_ITEM = {
     },
     {
       title: "All Products",
-      href: "/admin/dashboard/products",
+      href: "/admin/dashboard/export-products",
       icons: Package,
     },
     {
