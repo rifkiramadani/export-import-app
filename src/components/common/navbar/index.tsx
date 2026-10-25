@@ -33,7 +33,7 @@ const Navbar = async () => {
   const dashboardHref = `/${profile?.role ?? "user"}/dashboard/profile`;
 
   return (
-    <header className="flex flex-col items-center gap-3 w-full px-4 py-3 bg-linear-to-r from-secondary to-primary md:grid md:grid-cols-3">
+    <header className="sticky top-0 z-50 flex flex-col items-center gap-3 w-full px-4 py-3 bg-linear-to-r from-secondary to-primary shadow-md md:grid md:grid-cols-3">
       <div className="hidden md:flex justify-start"></div>
 
       <nav className="flex flex-row justify-center gap-4 md:gap-6 text-sm md:text-base whitespace-nowrap">

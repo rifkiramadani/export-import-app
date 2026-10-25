@@ -17,10 +17,9 @@ const Home = async () => {
             </span>
           </h1>
           <span className="text-center font-thin text-white/95 text-sm sm:text-base lg:text-lg leading-relaxed max-w-3xl mx-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-            To Website of the Export Import Forum, a B2B platform designed to
-            connect international trade businesses. Features a global navigation
-            system and an intuitive search feature to help users easily find
-            trade partners, buyers, and suppliers worldwide
+            Looking for your next trade partner? Search products from exporters
+            around the world, post what you need to import, and reach the right
+            people in just a few clicks.
           </span>
         </div>
 
