@@ -19,7 +19,7 @@ export async function fetchMarketItems(params: MarketFilterParams) {
         country:countries(id, name, code),
         unit:units(id, name),
         currency:currencies(id, code, name, symbol),
-        profile:profiles(name, company_name)
+        profile:profiles(name, company_name, whatsapp, avatar_url)
         `,
     { count: "exact" },
   );

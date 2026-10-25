@@ -36,6 +36,7 @@ import {
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 interface ProductClientProps {
   categories: Category[];
@@ -154,7 +155,7 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
           {items.map((item) => (
             <Card
               key={item.id}
-              className="flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all"
+              className="flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all py-0 gap-0"
             >
               <div>
                 {item.image_url ? (
@@ -162,7 +163,7 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
                     <Image
                       src={item.image_url}
                       alt={item.title}
-                      width={400} // Sesuaikan dengan layout kartu produk Anda
+                      width={400} // Sesuaikan dengan layout kartu produk
                       height={300}
                       className="h-full w-full object-cover"
                     />
@@ -184,12 +185,31 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
                   <CardTitle className="text-lg font-bold line-clamp-1">
                     {item.title}
                   </CardTitle>
-                  <p className="text-xs text-slate-500">
-                    By:{" "}
-                    <span className="font-semibold text-slate-700">
-                      {item.profile?.company_name || item.profile?.name}
+                  <Link
+                    href={`/profile/${item.profile_id}`}
+                    className="flex items-center gap-2 mt-2 group w-fit"
+                  >
+                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-slate-700 text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                      {item.profile?.avatar_url ? (
+                        <Image
+                          src={item.profile?.avatar_url}
+                          alt={item.profile?.name || "Avatar"}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                      ) : (
+                        <span>
+                          {item.profile?.name?.[0]?.toUpperCase() || "U"}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-semibold text-slate-700 text-xs group-hover:underline">
+                      {item.profile?.company_name ||
+                        item.profile?.name ||
+                        "Unknown Exporter"}
                     </span>
-                  </p>
+                  </Link>
                 </CardHeader>
                 <CardContent className="pb-3 text-sm text-slate-600 space-y-2">
                   <p className="line-clamp-2">{item.description}</p>
@@ -220,7 +240,10 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
                       </Button>
                     }
                   />
-                  <DialogContent className="bg-white text-slate-900 max-w-lg max-h-[90vh] overflow-y-auto">
+                  <DialogContent
+                    className="bg-white text-slate-900 max-w-lg max-h-[90vh] overflow-y-auto"
+                    initialFocus={false}
+                  >
                     <DialogHeader>
                       <DialogTitle className="text-xl font-bold">
                         {item.title}
@@ -289,19 +312,41 @@ const ProductPage = ({ categories, countries }: ProductClientProps) => {
                       </div>
 
                       <div className="border-t pt-3">
-                        <span className="text-xs text-slate-500 block mb-1">
+                        <span className="text-xs text-slate-500 block mb-1.5">
                           Exporter / Company
                         </span>
-                        <div className="font-medium text-slate-900">
-                          {item.profile?.company_name ||
-                            item.profile?.name ||
-                            "Unknown Exporter"}
-                        </div>
-                        {item.profile?.whatsapp && (
-                          <div className="text-xs text-slate-500 mt-0.5">
-                            WhatsApp: {item.profile.whatsapp}
+                        <Link
+                          href={`/profile/${item.profile_id}`}
+                          className="flex items-center gap-2.5 group w-fit"
+                        >
+                          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-slate-700 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                            {item.profile?.avatar_url ? (
+                              <Image
+                                src={item.profile.avatar_url}
+                                alt={item.profile?.name || "Avatar"}
+                                fill
+                                unoptimized
+                                className="object-cover"
+                              />
+                            ) : (
+                              <span>
+                                {item.profile?.name?.[0]?.toUpperCase() || "U"}
+                              </span>
+                            )}
                           </div>
-                        )}
+                          <div>
+                            <span className="font-semibold text-slate-800 text-sm group-hover:underline block">
+                              {item.profile?.company_name ||
+                                item.profile?.name ||
+                                "Unknown Exporter"}
+                            </span>
+                            {item.profile?.whatsapp && (
+                              <span className="text-xs text-slate-500 block">
+                                WhatsApp: {item.profile.whatsapp}
+                              </span>
+                            )}
+                          </div>
+                        </Link>
                       </div>
                     </div>
                   </DialogContent>

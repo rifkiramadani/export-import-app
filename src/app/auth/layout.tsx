@@ -18,7 +18,7 @@ const AuthLayout = async ({ children }: IAuthLayout) => {
 
   return (
     /* Elemen Utama (Memiliki sifat Flexbox untuk menengahkan konten di dalamnya) */
-    <div className="flex min-h-screen justify-center items-center px-3 bg-[url('/auth-background.jpeg')] bg-cover bg-center bg-no-repeat">
+    <div className="flex min-h-screen justify-center items-center px-3 bg-[url('/landing-page-background.jpeg')] bg-cover bg-center bg-no-repeat">
       {/* 
         1. OVERLAY dipisah dan dibuat berdiri sendiri. 
         2. Ditambahkan pointer-events-none agar lapisan transparan ini tidak menghalangi klik mouse pada form.
