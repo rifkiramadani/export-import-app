@@ -276,7 +276,7 @@ export function UserMarketTable({
             </Dialog>
 
             <a
-              href={`https://wa.me/${item.profile?.whatsapp}?text=${whatsappText}`}
+              href={`https://wa.me/${item.whatsapp_number}?text=${whatsappText}`}
               target="_blank"
               rel="noopener noreferrer"
             >
